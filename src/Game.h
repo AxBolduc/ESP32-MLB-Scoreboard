@@ -13,6 +13,9 @@ private:
     int homeTeamScore;
     int awayTeamScore;
     int currentInning;
+    int balls;
+    int strikes;
+    int outs;
     bool topOfInning;
     bool firstBaseOccupied;
     bool secondBaseOccupied;
@@ -28,6 +31,9 @@ public:
     int getAwayTeamId() { return this->awayTeamId; };
     int getHomeTeamScore() { return this->homeTeamScore; };
     int getAwayTeamScore() { return this->awayTeamScore; };
+    int getBalls() { return this->balls; };
+    int getStrikes() { return this->strikes; };
+    int getOuts() { return this->outs; };
     int getCurrentInning() { return this->currentInning; };
     bool isTopOfInning() { return this->topOfInning; };
     bool isFirstBaseOccupied() { return this->firstBaseOccupied; };
@@ -43,13 +49,14 @@ Game::Game(JsonObject game)
     this->awayTeamId = game["teams"]["away"]["team"]["id"].as<int>();
     this->homeTeamScore = game["linescore"]["teams"]["home"]["runs"].as<int>();
     this->awayTeamScore = game["linescore"]["teams"]["away"]["runs"].as<int>();
+    this->balls = game["linescore"]["balls"].as<int>();
+    this->strikes = game["linescore"]["strikes"].as<int>();
+    this->outs = game["linescore"]["outs"].as<int>();
     this->currentInning = game["linescore"]["currentInning"].as<int>();
     this->topOfInning = game["linescore"]["isTopInning"].as<bool>();
     this->firstBaseOccupied = game["linescore"]["offense"]["first"].as<bool>();
     this->secondBaseOccupied = game["linescore"]["offense"]["second"].as<bool>();
     this->thirdBaseOccupied = game["linescore"]["offense"]["third"].as<bool>();
-
-    Serial.println(game["linescore"]["currentInning"].as<int>());
 }
 
 Game::~Game()

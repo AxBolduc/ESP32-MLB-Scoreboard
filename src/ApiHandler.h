@@ -10,60 +10,54 @@
 class ApiHandler
 {
 private:
-    HTTPClient* http;
-    DynamicJsonDocument* doc;
+    HTTPClient *http;
+    DynamicJsonDocument *doc;
+
 public:
-    ApiHandler(HTTPClient* http, DynamicJsonDocument* doc);
+    ApiHandler(HTTPClient *http, DynamicJsonDocument *doc);
     ~ApiHandler();
     JsonObject getSchedule(String date);
-    JsonObject getTeamSchedule(String date, TEAM_ID team);
-    JsonObject getTeamScheduleToday(TEAM_ID team);
+    JsonObject getTeamSchedule(TEAM_ID team, String date);
+    DynamicJsonDocument *getTeamScheduleToday(TEAM_ID team);
 };
 
-ApiHandler::ApiHandler(HTTPClient* http, DynamicJsonDocument* doc)
+ApiHandler::ApiHandler(HTTPClient *http, DynamicJsonDocument *doc)
 {
     this->http = http;
     this->doc = doc;
 }
 
-
 ApiHandler::~ApiHandler()
 {
-    delete(http);
-    delete(doc);
+    delete (http);
+    delete (doc);
 }
 
 /**
  * @brief Get the schedule for a specific date
-*/
+ */
 JsonObject ApiHandler::getSchedule(String date)
 {
     String url = scheduleUrlGenerator(date);
-    Serial.println("URL GENERATED");
     http->begin(url);
-    Serial.println("HTTP REQUEST STARTED");
     http->useHTTP10();
     int httpCode = http->GET();
     if (httpCode == 200)
     {
         deserializeJson(*doc, http->getStream());
-        Serial.println("JSON DESERIALIZED");
     }
     else
     {
         Serial.println("Error on HTTP request");
-        delete(this);
-        exit(1);
     }
-    Serial.println("HTTP REQUEST ENDED");
     http->end();
     return doc->as<JsonObject>();
 }
 
 /**
  * @brief Get the schedule for a specific team on a specific date
-*/
-JsonObject ApiHandler::getTeamSchedule(String date, TEAM_ID team)
+ */
+JsonObject ApiHandler::getTeamSchedule(TEAM_ID team, String date)
 {
     String url = scheduleUrlGenerator(date, team);
     http->begin(url);
@@ -76,7 +70,7 @@ JsonObject ApiHandler::getTeamSchedule(String date, TEAM_ID team)
     else
     {
         Serial.println("Error on HTTP request");
-        delete(this);
+        delete (this);
         exit(1);
     }
     http->end();
@@ -85,12 +79,10 @@ JsonObject ApiHandler::getTeamSchedule(String date, TEAM_ID team)
 
 /**
  * @brief Get the schedule for a specific team today
-*/
-JsonObject ApiHandler::getTeamScheduleToday(TEAM_ID team)
+ */
+DynamicJsonDocument *ApiHandler::getTeamScheduleToday(TEAM_ID team)
 {
     String url = scheduleUrlGenerator(getTodayDate(), team);
-
-    Serial.printf("Requesting schedule at url: %s\n", url.c_str());
 
     http->begin(url);
     http->useHTTP10();
@@ -102,11 +94,11 @@ JsonObject ApiHandler::getTeamScheduleToday(TEAM_ID team)
     else
     {
         Serial.println("Error on HTTP request");
-        delete(this);
-        exit(1);
+        Serial.println(httpCode);
     }
     http->end();
-    return doc->as<JsonObject>();
+    // return doc->as<JsonObject>();
+    return doc;
 }
 
 #endif

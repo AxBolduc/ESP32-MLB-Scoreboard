@@ -69,6 +69,10 @@ String scheduleUrlGenerator(String date)
 
 String scheduleUrlGenerator(String date, TEAM_ID teamId)
 {
+    if (date == "")
+    {
+    }
+
     String hydrations[HYDRATIONS_ARRAY_SIZE] = {"team", "linescore"};
     String fields[FIELDS_ARRAY_SIZE] = {"dates",
                                         "games",
@@ -86,8 +90,10 @@ String scheduleUrlGenerator(String date, TEAM_ID teamId)
                                         "offense",
                                         "first",
                                         "second",
-                                        "third"
-                                        };
+                                        "third",
+                                        "balls",
+                                        "strikes",
+                                        "outs"};
 
     String url = apiURLGenerator("schedule", hydrations, fields);
 

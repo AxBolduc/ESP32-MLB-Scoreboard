@@ -4,16 +4,20 @@
 // #define BASE_URL "http://192.168.1.221:3000/"
 #define BASE_URL "http://statsapi.mlb.com/api/"
 #define PANEL_WIDTH 64
-#define PANEL_HEIGHT 32  	// Panel height of 64 will required PIN_E to be defined.
-#define PANELS_NUMBER 1 	// Number of chained panels, if just a single panel, obviously set to 1
+#define PANEL_HEIGHT 32 // Panel height of 64 will required PIN_E to be defined.
+#define PANELS_NUMBER 1 // Number of chained panels, if just a single panel, obviously set to 1
 #define JSON_BUFFER_SIZE 2048
 #define BOX_PADDING 2
 #define HYDRATIONS_ARRAY_SIZE 32
 #define FIELDS_ARRAY_SIZE 32
+#define BUTTON_PIN 32
 
 #include <map>
 
-enum TEAM_ID {
+const int TEAM_IDS[30] = {109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 133, 134, 135, 136, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147, 158};
+
+enum TEAM_ID
+{
     ATLANTA_BRAVES = 144,
     ARIZONA_DIAMONDBACKS = 109,
     BALTIMORE_ORIOLES = 110,
@@ -43,10 +47,35 @@ enum TEAM_ID {
     TAMPA_BAY_RAYS = 139,
     TEXAS_RANGERS = 140,
     TORONTO_BLUE_JAYS = 141,
-    WASHINGTON_NATIONALS = 120
+    WASHINGTON_NATIONALS = 120,
+    NUM_TEAM_IDS = 30
 };
 
-enum COLORS {
+TEAM_ID operator++(TEAM_ID &id)
+{
+    int currentId = 0;
+    for (int i = 0; i < NUM_TEAM_IDS; i++)
+    {
+        if (id == TEAM_IDS[i])
+        {
+            currentId = i;
+            break;
+        }
+    }
+
+    id = static_cast<TEAM_ID>(TEAM_IDS[(currentId + 1) % NUM_TEAM_IDS]);
+    return id;
+}
+
+TEAM_ID operator++(TEAM_ID &id, int) // postfix operator
+{
+    TEAM_ID result = id;
+    ++id;
+    return result;
+}
+
+enum COLORS
+{
     RED = 0x8000,
     YELLOW = 0xFFE0,
     WHITE = 0xFFFF,
@@ -79,7 +108,7 @@ std::map<int, uint16_t> TEAM_BG_COLORS = {
     {TEAM_ID::MILWAUKEE_BREWERS, COLORS::NAVY_BLUE},
     {TEAM_ID::MINNESOTA_TWINS, COLORS::NAVY_BLUE},
     {TEAM_ID::NEW_YORK_METS, COLORS::ROYAL_BLUE},
-    {TEAM_ID::NEW_YORK_YANKEES, COLORS::GRAY},
+    {TEAM_ID::NEW_YORK_YANKEES, COLORS::BLACK},
     {TEAM_ID::OAKLAND_ATHLETICS, COLORS::GREEN},
     {TEAM_ID::PHILADELPHIA_PHILLIES, COLORS::RED},
     {TEAM_ID::PITTSBURGH_PIRATES, COLORS::BLACK},
@@ -90,8 +119,7 @@ std::map<int, uint16_t> TEAM_BG_COLORS = {
     {TEAM_ID::TAMPA_BAY_RAYS, COLORS::NAVY_BLUE},
     {TEAM_ID::TEXAS_RANGERS, COLORS::ROYAL_BLUE},
     {TEAM_ID::TORONTO_BLUE_JAYS, COLORS::ROYAL_BLUE},
-    {TEAM_ID::WASHINGTON_NATIONALS, COLORS::RED}
-};
+    {TEAM_ID::WASHINGTON_NATIONALS, COLORS::RED}};
 
 std::map<int, uint16_t> TEAMS_TEXT_COLORS = {
     {TEAM_ID::ATLANTA_BRAVES, COLORS::RED},
@@ -110,18 +138,18 @@ std::map<int, uint16_t> TEAMS_TEXT_COLORS = {
     {TEAM_ID::LOS_ANGELES_DODGERS, COLORS::WHITE},
     {TEAM_ID::MIAMI_MARLINS, COLORS::WHITE},
     {TEAM_ID::MILWAUKEE_BREWERS, COLORS::YELLOW},
-    {TEAM_ID::MINNESOTA_TWINS, COLORS::RED},
-    {TEAM_ID::NEW_YORK_METS, COLORS::NAVY_BLUE},
-    {TEAM_ID::NEW_YORK_YANKEES, COLORS::BLACK},
-    {TEAM_ID::OAKLAND_ATHLETICS, COLORS::YELLOW},
+    {TEAM_ID::MINNESOTA_TWINS, COLORS::WHITE},
+    {TEAM_ID::NEW_YORK_METS, COLORS::ORANGE},
+    {TEAM_ID::NEW_YORK_YANKEES, COLORS::WHITE},
+    {TEAM_ID::OAKLAND_ATHLETICS, COLORS::BLACK},
     {TEAM_ID::PHILADELPHIA_PHILLIES, COLORS::WHITE},
     {TEAM_ID::PITTSBURGH_PIRATES, COLORS::YELLOW},
     {TEAM_ID::SAN_DIEGO_PADRES, COLORS::YELLOW},
     {TEAM_ID::SAN_FRANCISCO_GIANTS, COLORS::ORANGE},
-    {TEAM_ID::SEATTLE_MARINERS, COLORS::NAVY_BLUE},
+    {TEAM_ID::SEATTLE_MARINERS, COLORS::WHITE},
     {TEAM_ID::ST_LOUIS_CARDINALS, COLORS::WHITE},
-    {TEAM_ID::TAMPA_BAY_RAYS, COLORS::NAVY_BLUE},
-    {TEAM_ID::TEXAS_RANGERS, COLORS::NAVY_BLUE},
+    {TEAM_ID::TAMPA_BAY_RAYS, COLORS::ROYAL_BLUE},
+    {TEAM_ID::TEXAS_RANGERS, COLORS::RED},
     {TEAM_ID::TORONTO_BLUE_JAYS, COLORS::WHITE},
     {TEAM_ID::WASHINGTON_NATIONALS, COLORS::WHITE},
 };
