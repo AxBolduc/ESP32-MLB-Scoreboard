@@ -5,8 +5,6 @@
 #include "HTTPClient.h"
 #include "ArduinoJson.h"
 
-#define JSON_BUFFER_SIZE 4096
-
 class ApiHandler
 {
 private:
@@ -48,7 +46,7 @@ JsonObject ApiHandler::getSchedule(String date)
     }
     else
     {
-        Serial.println("Error on HTTP request");
+        Serial.printf("Error getting mlb schedule for date (%s)", date);
     }
     http->end();
     return doc->as<JsonObject>();
@@ -69,7 +67,7 @@ JsonObject ApiHandler::getTeamSchedule(TEAM_ID team, String date)
     }
     else
     {
-        Serial.println("Error on HTTP request");
+        Serial.printf("Error getting %s schedule for date (%s)\n", team, date);
         delete (this);
         exit(1);
     }
@@ -93,7 +91,7 @@ DynamicJsonDocument *ApiHandler::getTeamScheduleToday(TEAM_ID team)
     }
     else
     {
-        Serial.println("Error on HTTP request");
+        Serial.printf("Error getting %s schedule\n", team);
         Serial.println(httpCode);
     }
     http->end();

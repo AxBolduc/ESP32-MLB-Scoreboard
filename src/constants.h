@@ -6,11 +6,12 @@
 #define PANEL_WIDTH 64
 #define PANEL_HEIGHT 32 // Panel height of 64 will required PIN_E to be defined.
 #define PANELS_NUMBER 1 // Number of chained panels, if just a single panel, obviously set to 1
-#define JSON_BUFFER_SIZE 2048
+#define JSON_BUFFER_SIZE 4096
 #define BOX_PADDING 2
 #define HYDRATIONS_ARRAY_SIZE 32
 #define FIELDS_ARRAY_SIZE 32
 #define BUTTON_PIN 32
+#define WEBSOCKET_URL "scoreboard-backend-alex-honoapiscript-nasktzuh.alex0722.workers.dev"
 
 #include <map>
 

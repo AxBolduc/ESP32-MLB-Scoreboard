@@ -1,18 +1,22 @@
 // #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
+#include <WiFiManager.h>
+#include <WebSocketsClient.h>
 #include "constants.h"
 #include "WiFi.h"
 #include "ApiHandler.h"
 #include "Matrix.h"
 #include "GameDrawer.h"
 #include "./util.hpp"
-#include <WiFiManager.h>
 #include "./touchButton.h"
+#include "SocketHandler.h"
 
 MatrixPanel_I2S_DMA *Matrix::dma_display = nullptr;
 MatrixPanel_I2S_DMA *dma_display;
 
 unsigned long time_counter = 0;
 ApiHandler *apiHandler;
+
+SocketHandler *socketHandler;
 
 // Define a score struct
 struct Score
@@ -22,9 +26,6 @@ struct Score
 };
 
 Score currentScore;
-
-char ssid[] = "HowAreYouDoing";
-char password[] = "livingthedream";
 
 const char *ntpServer = "pool.ntp.org";
 const long gmtOffset_sec = 3600 * -1 * 5;
@@ -41,6 +42,7 @@ GameDrawer gameDrawer;
 TouchButtonConfig touchConfig(T9);
 ace_button::AceButton aceButton(&touchConfig, T9);
 
+
 void updateScreen()
 {
   time_counter = millis();
@@ -56,6 +58,12 @@ void updateScreen()
 
   Game *game = new Game(scheduleObject["dates"][0]["games"][0].as<JsonObject>());
   gameDrawer.drawGame(game);
+}
+
+void handleSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
+  teamId++;
+  updateScreen();
+  Serial.printf("The current team id is: %d\n", teamId);
 }
 
 void buttonHandler(ace_button::AceButton *button, uint8_t eventType, uint8_t buttonState)
@@ -122,6 +130,7 @@ void setup()
     Serial.println("Connected to wifi");
   }
 
+  socketHandler = new SocketHandler(handleSocketEvent);
   apiHandler = new ApiHandler(&http, &doc);
 
   time_counter = -30001;
@@ -129,6 +138,7 @@ void setup()
 
 void loop()
 {
+  socketHandler->loop();
   aceButton.check();
   if (millis() - time_counter > (unsigned long)30000)
   {
