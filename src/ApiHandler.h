@@ -1,102 +1,48 @@
 #ifndef INCLUDE_APIHANDLER_H
 #define INCLUDE_APIHANDLER_H
 
-#include "util.hpp"
-#include "HTTPClient.h"
-#include "ArduinoJson.h"
+#include <Arduino.h>
+#include <HTTPClient.h>
+#include <ArduinoJson.h>
+#include "TeamInfo.h"
 
+/**
+ * @brief Handles HTTP requests to MLB Stats API
+ */
 class ApiHandler
 {
 private:
-    HTTPClient *http;
-    DynamicJsonDocument *doc;
+    HTTPClient http;
+    DynamicJsonDocument doc;
 
 public:
-    ApiHandler(HTTPClient *http, DynamicJsonDocument *doc);
+    ApiHandler();
     ~ApiHandler();
-    JsonObject getSchedule(String date);
-    JsonObject getTeamSchedule(TEAM_ID team, String date);
-    DynamicJsonDocument *getTeamScheduleToday(TEAM_ID team);
+    
+    /**
+     * @brief Get team schedule for today
+     * @param team Team ID
+     * @param outDoc Output document to populate with results
+     * @return true on success, false on failure
+     */
+    bool getTeamScheduleToday(TEAM_ID team, DynamicJsonDocument& outDoc);
+    
+    /**
+     * @brief Get schedule for a specific date
+     * @param date Date in YYYY-MM-DD format
+     * @param outDoc Output document to populate with results
+     * @return true on success, false on failure
+     */
+    bool getSchedule(const String& date, DynamicJsonDocument& outDoc);
+    
+    /**
+     * @brief Get team schedule for a specific date
+     * @param team Team ID
+     * @param date Date in YYYY-MM-DD format
+     * @param outDoc Output document to populate with results
+     * @return true on success, false on failure
+     */
+    bool getTeamSchedule(TEAM_ID team, const String& date, DynamicJsonDocument& outDoc);
 };
 
-ApiHandler::ApiHandler(HTTPClient *http, DynamicJsonDocument *doc)
-{
-    this->http = http;
-    this->doc = doc;
-}
-
-ApiHandler::~ApiHandler()
-{
-    delete (http);
-    delete (doc);
-}
-
-/**
- * @brief Get the schedule for a specific date
- */
-JsonObject ApiHandler::getSchedule(String date)
-{
-    String url = scheduleUrlGenerator(date);
-    http->begin(url);
-    http->useHTTP10();
-    int httpCode = http->GET();
-    if (httpCode == 200)
-    {
-        deserializeJson(*doc, http->getStream());
-    }
-    else
-    {
-        Serial.printf("Error getting mlb schedule for date (%s)", date);
-    }
-    http->end();
-    return doc->as<JsonObject>();
-}
-
-/**
- * @brief Get the schedule for a specific team on a specific date
- */
-JsonObject ApiHandler::getTeamSchedule(TEAM_ID team, String date)
-{
-    String url = scheduleUrlGenerator(date, team);
-    http->begin(url);
-    http->useHTTP10();
-    int httpCode = http->GET();
-    if (httpCode == 200)
-    {
-        deserializeJson(*doc, http->getStream());
-    }
-    else
-    {
-        Serial.printf("Error getting %s schedule for date (%s)\n", team, date);
-        delete (this);
-        exit(1);
-    }
-    http->end();
-    return doc->as<JsonObject>();
-}
-
-/**
- * @brief Get the schedule for a specific team today
- */
-DynamicJsonDocument *ApiHandler::getTeamScheduleToday(TEAM_ID team)
-{
-    String url = scheduleUrlGenerator(getTodayDate(), team);
-
-    http->begin(url);
-    http->useHTTP10();
-    int httpCode = http->GET();
-    if (httpCode == 200)
-    {
-        deserializeJson(*doc, http->getStream());
-    }
-    else
-    {
-        Serial.printf("Error getting %s schedule\n", team);
-        Serial.println(httpCode);
-    }
-    http->end();
-    // return doc->as<JsonObject>();
-    return doc;
-}
-
-#endif
+#endif // INCLUDE_APIHANDLER_H

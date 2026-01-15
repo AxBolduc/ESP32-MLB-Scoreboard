@@ -1,147 +1,175 @@
-// #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
+#include <Arduino.h>
 #include <WiFiManager.h>
 #include <WebSocketsClient.h>
-#include "constants.h"
-#include "WiFi.h"
+#include <AceButton.h>
+#include "Config.h"
+#include "TeamInfo.h"
+#include "Game.h"
 #include "ApiHandler.h"
 #include "Matrix.h"
 #include "GameDrawer.h"
-#include "./util.hpp"
-#include "./touchButton.h"
 #include "SocketHandler.h"
+#include "touchButton.h"
 
-MatrixPanel_I2S_DMA *Matrix::dma_display = nullptr;
-MatrixPanel_I2S_DMA *dma_display;
+// Global state
+MatrixPanel_I2S_DMA* display = nullptr;
+GameDrawer* gameDrawer = nullptr;
+ApiHandler* apiHandler = nullptr;
+SocketHandler* socketHandler = nullptr;
+Game* currentGame = nullptr;
 
-unsigned long time_counter = 0;
-ApiHandler *apiHandler;
-
-SocketHandler *socketHandler;
-
-// Define a score struct
-struct Score
-{
-  int home;
-  int away;
-};
-
-Score currentScore;
-
-const char *ntpServer = "pool.ntp.org";
-const long gmtOffset_sec = 3600 * -1 * 5;
-const int daylightOffset_sec = 3600;
-
-int status = WL_IDLE_STATUS;
-
-TEAM_ID teamId = TEAM_ID::BOSTON_REDSOX;
-
-HTTPClient http;
-DynamicJsonDocument doc(JSON_BUFFER_SIZE);
-GameDrawer gameDrawer;
+TEAM_ID currentTeam = TEAM_ID::BOSTON_REDSOX;
+unsigned long lastUpdateTime = 0;
 
 TouchButtonConfig touchConfig(T9);
-ace_button::AceButton aceButton(&touchConfig, T9);
+ace_button::AceButton button(&touchConfig, T9);
 
+// Function declarations
+void updateScreen();
+void buttonHandler(ace_button::AceButton* button, uint8_t eventType, uint8_t buttonState);
+void handleSocketEvent(WStype_t type, uint8_t* payload, size_t length);
+void wifiConnectionCallback(WiFiManager* wifiManager);
 
 void updateScreen()
 {
-  time_counter = millis();
-  DynamicJsonDocument *schedule = apiHandler->getTeamScheduleToday(teamId);
-
-  if (schedule == nullptr)
-  {
-    Serial.println("Failed to get schedule for some reason");
-    return;
-  }
-
-  JsonObject scheduleObject = schedule->as<JsonObject>();
-
-  Game *game = new Game(scheduleObject["dates"][0]["games"][0].as<JsonObject>());
-  gameDrawer.drawGame(game);
+    lastUpdateTime = millis();
+    
+    DynamicJsonDocument schedule(ApiConfig::JSON_BUFFER_SIZE);
+    bool success = apiHandler->getTeamScheduleToday(currentTeam, schedule);
+    
+    if (!success)
+    {
+        Serial.println("Failed to get schedule");
+        return;
+    }
+    
+    // Check if we have valid data
+    if (!schedule["dates"].is<JsonArray>() || schedule["dates"].size() == 0)
+    {
+        Serial.println("No games scheduled for today");
+        gameDrawer->drawFullscreenText("No game today");
+        return;
+    }
+    
+    if (!schedule["dates"][0]["games"].is<JsonArray>() || schedule["dates"][0]["games"].size() == 0)
+    {
+        Serial.println("No games in schedule");
+        gameDrawer->drawFullscreenText("No game data");
+        return;
+    }
+    
+    JsonObject gameData = schedule["dates"][0]["games"][0].as<JsonObject>();
+    
+    // Delete old game if it exists
+    if (currentGame != nullptr)
+    {
+        delete currentGame;
+        currentGame = nullptr;
+    }
+    
+    // Create new game
+    currentGame = new Game(gameData);
+    gameDrawer->drawGame(currentGame);
 }
 
-void handleSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
-  teamId++;
-  updateScreen();
-  Serial.printf("The current team id is: %d\n", teamId);
-}
-
-void buttonHandler(ace_button::AceButton *button, uint8_t eventType, uint8_t buttonState)
+void handleSocketEvent(WStype_t type, uint8_t* payload, size_t length)
 {
-  switch (eventType)
-  {
-  case ace_button::AceButton::kEventPressed:
-    Serial.println("Pressed");
-    teamId++;
-    gameDrawer.drawFullscreenText("Next...");
+    currentTeam++;
     updateScreen();
-    break;
-  case ace_button::AceButton::kEventReleased:
-    Serial.println("Released");
-    break;
-  }
+    Serial.printf("Switched to team ID: %d\n", static_cast<int>(currentTeam));
 }
 
-void wifiConnectionCallback(WiFiManager *wifiManager)
+void buttonHandler(ace_button::AceButton* btn, uint8_t eventType, uint8_t buttonState)
 {
-  Serial.println("Setting up AP to connect to wifi");
-  gameDrawer.drawWifi();
+    switch (eventType)
+    {
+    case ace_button::AceButton::kEventPressed:
+        Serial.println("Button pressed");
+        currentTeam++;
+        gameDrawer->drawFullscreenText("Next...");
+        updateScreen();
+        break;
+    case ace_button::AceButton::kEventReleased:
+        Serial.println("Button released");
+        break;
+    }
+}
+
+void wifiConnectionCallback(WiFiManager* wifiManager)
+{
+    Serial.println("Entering WiFi configuration mode");
+    gameDrawer->drawWifi();
 }
 
 void setup()
 {
-
-  Serial.begin(115200);
-
-  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
-
-  dma_display = Matrix::get();
-
-  // Allocate memory and start DMA display
-  if (not dma_display->begin())
-    Serial.println("****** !KABOOM! I2S memory allocation failed ***********");
-
-  dma_display->setBrightness8(32);
-  dma_display->clearScreen();
-
-  gameDrawer.drawLoading();
-
-  pinMode(BUTTON_PIN, INPUT);
-
-  aceButton.getButtonConfig()->setFeature(ace_button::ButtonConfig::kFeatureClick);
-  aceButton.setEventHandler(buttonHandler);
-
-  WiFiManager wm;
-
-  bool res;
-  wm.setAPCallback(wifiConnectionCallback);
-  res = wm.autoConnect("MLBScoreboard");
-
-  if (!res)
-  {
-    Serial.println("Failed to connect and hit timeout");
-    gameDrawer.drawFullscreenText("Failed WIFI");
-    sleep(30);
-
-    ESP.restart();
-  }
-  else
-  {
-    Serial.println("Connected to wifi");
-  }
-
-  socketHandler = new SocketHandler(handleSocketEvent);
-  apiHandler = new ApiHandler(&http, &doc);
-
-  time_counter = -30001;
+    Serial.begin(115200);
+    Serial.println("MLB Scoreboard starting...");
+    
+    // Configure NTP time
+    configTime(NetworkConfig::GMT_OFFSET_SEC, NetworkConfig::DAYLIGHT_OFFSET_SEC, 
+              NetworkConfig::NTP_SERVER);
+    
+    // Initialize display
+    display = Matrix::getInstance();
+    if (!display->begin())
+    {
+        Serial.println("ERROR: Matrix display initialization failed!");
+        return;
+    }
+    
+    display->setBrightness8(DisplayConfig::BRIGHTNESS);
+    display->clearScreen();
+    
+    // Create game drawer
+    gameDrawer = new GameDrawer(display);
+    gameDrawer->drawLoading();
+    
+    // Configure touch button
+    pinMode(AppConfig::BUTTON_PIN, INPUT);
+    button.getButtonConfig()->setFeature(ace_button::ButtonConfig::kFeatureClick);
+    button.setEventHandler(buttonHandler);
+    
+    // Connect to WiFi
+    WiFiManager wm;
+    wm.setAPCallback(wifiConnectionCallback);
+    
+    bool connected = wm.autoConnect(AppConfig::WIFI_AP_NAME);
+    
+    if (!connected)
+    {
+        Serial.println("Failed to connect to WiFi - restarting");
+        gameDrawer->drawFullscreenText("WiFi Failed");
+        delay(3000);
+        ESP.restart();
+    }
+    
+    Serial.println("Connected to WiFi");
+    
+    // Initialize API handler and WebSocket
+    apiHandler = new ApiHandler();
+    socketHandler = new SocketHandler(handleSocketEvent);
+    
+    // Initial screen update
+    lastUpdateTime = -(AppConfig::UPDATE_INTERVAL_MS + 1);  // Force immediate update
+    
+    Serial.println("Setup complete");
 }
 
 void loop()
 {
-  socketHandler->loop();
-  aceButton.check();
-  if (millis() - time_counter > (unsigned long)30000)
-  {
-    updateScreen();
-  }
+    // Process WebSocket events
+    if (socketHandler)
+    {
+        socketHandler->loop();
+    }
+    
+    // Check button
+    button.check();
+    
+    // Update screen every interval
+    if (millis() - lastUpdateTime > AppConfig::UPDATE_INTERVAL_MS)
+    {
+        updateScreen();
+    }
 }
