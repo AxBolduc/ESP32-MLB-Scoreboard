@@ -17,6 +17,10 @@ struct DisplayConfig
     static const int BASE_SIDE_LENGTH = 4;
     static const int BASES_TOP_X = 32;
     static const int BASES_TOP_Y = 11;
+    
+    // Text wrapping configuration
+    static const int TEXT_LINE_SPACING = 2;  // Pixels between lines
+    static const int TEXT_MAX_LINES = 4;     // Maximum lines to display
 };
 
 /**

@@ -23,6 +23,17 @@ private:
     void bottomInningTriangle();
     void drawBases(const Game* game);
     void drawBase(int16_t x, int16_t y, bool occupied);
+    
+    /**
+     * @brief Draw text with word wrapping and centering
+     * @param text Text to wrap and display
+     * @param maxWidth Maximum width in pixels before wrapping
+     * @param fg_color Text color
+     * @param bg_color Background color
+     * @return Total height of rendered text block
+     */
+    uint16_t drawWrappedText(const String& text, uint16_t maxWidth, 
+                            uint16_t fg_color, uint16_t bg_color);
 
 public:
     /**
