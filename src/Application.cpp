@@ -1,6 +1,7 @@
 #include "Application.h"
 #include "Matrix.h"
 #include "NetworkManager.h"
+#include <ArduinoJson.h>
 
 // Global application instance for callbacks
 Application* g_app = nullptr;
@@ -15,6 +16,8 @@ Application::Application()
     , currentGame(nullptr)
     , currentTeam(TEAM_ID::BOSTON_REDSOX)
     , lastUpdateTime(0)
+    , customNoGameMessage("")
+    , hasCustomNoGameMessage(false)
 {
     // Components will be initialized in setup()
 }
@@ -190,7 +193,14 @@ void Application::updateScreen()
     if (!schedule["dates"].is<JsonArray>() || schedule["dates"].size() == 0)
     {
         Serial.println("No games scheduled for today");
-        gameDrawer->drawFullscreenText("No game today");
+        if (hasCustomNoGameMessage)
+        {
+            gameDrawer->drawFullscreenText(customNoGameMessage);
+        }
+        else
+        {
+            gameDrawer->drawFullscreenText("No game today");
+        }
         return;
     }
     
@@ -198,7 +208,14 @@ void Application::updateScreen()
         schedule["dates"][0]["games"].size() == 0)
     {
         Serial.println("No games in schedule");
-        gameDrawer->drawFullscreenText("No game data");
+        if (hasCustomNoGameMessage)
+        {
+            gameDrawer->drawFullscreenText(customNoGameMessage);
+        }
+        else
+        {
+            gameDrawer->drawFullscreenText("No game data");
+        }
         return;
     }
     
@@ -263,12 +280,86 @@ void Application::handleButtonEvent(uint8_t eventType, uint8_t buttonState)
 
 void Application::handleSocketEvent(WStype_t type, uint8_t* payload, size_t length)
 {
-    Serial.printf("WebSocket event received (type: %d)\n", type);
-    
-    // For now, just cycle team on any socket event
-    currentTeam++;
-    updateScreen();
-    Serial.printf("Switched to team ID: %d\n", static_cast<int>(currentTeam));
+
+    Serial.println("Handling socket event");
+
+    switch (type)
+    {
+    case WStype_DISCONNECTED:
+        Serial.println("WebSocket disconnected");
+        break;
+        
+    case WStype_CONNECTED:
+        Serial.println("WebSocket connected");
+        break;
+        
+    case WStype_TEXT:
+        Serial.printf("WebSocket message received: %s\n", payload);
+        
+        // Parse JSON message
+        {
+            DynamicJsonDocument doc(512);
+            DeserializationError error = deserializeJson(doc, payload, length);
+            
+            if (error)
+            {
+                Serial.printf("JSON parse error: %s\n", error.c_str());
+                return;
+            }
+            
+            // Check for command field
+            if (!doc.containsKey("command"))
+            {
+                Serial.println("WebSocket message missing 'command' field");
+                return;
+            }
+            
+            String command = doc["command"].as<String>();
+            
+            if (command == "newMessage")
+            {
+                // Set custom message
+                if (!doc.containsKey("data"))
+                {
+                    Serial.println("newMessage command missing 'data' field");
+                    return;
+                }
+                
+                customNoGameMessage = doc["data"].as<String>();
+                hasCustomNoGameMessage = true;
+                
+                Serial.printf("Custom message set: %s\n", customNoGameMessage.c_str());
+                
+                // Update display immediately if we're currently showing a no-game message
+                if (gameDrawer)
+                {
+                    gameDrawer->drawFullscreenText(customNoGameMessage);
+                }
+            }
+            else if (command == "clearMessage")
+            {
+                // Clear custom message
+                customNoGameMessage = "";
+                hasCustomNoGameMessage = false;
+                
+                Serial.println("Custom message cleared");
+                
+                // Update display immediately to show default message
+                if (gameDrawer)
+                {
+                    gameDrawer->drawFullscreenText("No game today");
+                }
+            }
+            else
+            {
+                Serial.printf("Unknown command: %s\n", command.c_str());
+            }
+        }
+        break;
+        
+    default:
+        break;
+    }
 }
 
 void Application::handleWiFiAPMode()

@@ -39,6 +39,8 @@ private:
     Game* currentGame;
     TEAM_ID currentTeam;
     unsigned long lastUpdateTime;
+    String customNoGameMessage;      // Custom message to show when no game
+    bool hasCustomNoGameMessage;     // Flag indicating custom message is set
     
     // Private methods
     void updateScreen();
