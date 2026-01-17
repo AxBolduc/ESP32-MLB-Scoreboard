@@ -1,5 +1,6 @@
 #include "NHLUrlBuilder.h"
 #include "../../Config.h"
+#include "./NHLConfig.h"
 #include <time.h>
 
 // STUBBED: NHL API endpoints not yet defined
@@ -18,14 +19,10 @@ String NHLUrlBuilder::buildScheduleUrl(const String& date)
 
 String NHLUrlBuilder::buildTeamScheduleUrl(const String& date, int teamId)
 {
-    // STUBBED: Return empty URL - API not implemented
-    // When ready, implement like this:
-    // String url = String(NHLConfig::BASE_URL) + "schedule?date=" + date;
-    // url += "&teamId=" + String(teamId);
-    // return url;
+    // TODO: Get 3-letter team abbreviation from teamId
+    String url = String(NHLConfig::BASE_URL) + "v1/club-schedule/" + "BOS" + "/week/now";
     
-    Serial.println("NHL buildTeamScheduleUrl is stubbed");
-    return "";
+    return url;
 }
 
 String NHLUrlBuilder::getTodayDate()
