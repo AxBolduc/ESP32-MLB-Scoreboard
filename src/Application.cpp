@@ -296,13 +296,13 @@ void Application::handleSocketEvent(WStype_t type, uint8_t* payload, size_t leng
             if (command == "switchSport")
             {
                 // Switch sport
-                if (!doc.containsKey("sport"))
+                if (!doc.containsKey("data"))
                 {
-                    Serial.println("switchSport command missing 'sport' field");
+                    Serial.println("switchSport command missing 'data' field");
                     return;
                 }
                 
-                String sportName = doc["sport"].as<String>();
+                String sportName = doc["data"].as<String>();
                 SportType newSport = SportFactory::sportTypeFromString(sportName);
                 switchSport(newSport);
             }
