@@ -1,8 +1,8 @@
-#include "UrlBuilder.h"
-#include "Config.h"
+#include "MLBUrlBuilder.h"
+#include "../../Config.h"
 #include <time.h>
 
-String UrlBuilder::buildApiUrl(
+String MLBUrlBuilder::buildApiUrl(
     const String& endpoint,
     const std::vector<String>& hydrations,
     const std::vector<String>& fields)
@@ -34,7 +34,7 @@ String UrlBuilder::buildApiUrl(
     return url;
 }
 
-String UrlBuilder::buildScheduleUrl(const String& date)
+String MLBUrlBuilder::buildScheduleUrl(const String& date)
 {
     std::vector<String> hydrations = {"team", "linescore"};
     std::vector<String> fields = {
@@ -51,7 +51,7 @@ String UrlBuilder::buildScheduleUrl(const String& date)
     return url;
 }
 
-String UrlBuilder::buildTeamScheduleUrl(const String& date, TEAM_ID teamId)
+String MLBUrlBuilder::buildTeamScheduleUrl(const String& date, int teamId)
 {
     std::vector<String> hydrations = {"team", "linescore"};
     std::vector<String> fields = {
@@ -65,12 +65,12 @@ String UrlBuilder::buildTeamScheduleUrl(const String& date, TEAM_ID teamId)
     String url = buildApiUrl("schedule", hydrations, fields);
     url += "&startDate=" + date;
     url += "&endDate=" + date;
-    url += "&teamId=" + String(static_cast<int>(teamId));
+    url += "&teamId=" + String(teamId);
     
     return url;
 }
 
-String UrlBuilder::getTodayDate()
+String MLBUrlBuilder::getTodayDate()
 {
     struct tm timeInfo;
     if (!getLocalTime(&timeInfo))

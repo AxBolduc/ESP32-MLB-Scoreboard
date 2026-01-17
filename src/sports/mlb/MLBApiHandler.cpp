@@ -1,21 +1,21 @@
-#include "ApiHandler.h"
-#include "UrlBuilder.h"
-#include "Config.h"
+#include "MLBApiHandler.h"
+#include "MLBUrlBuilder.h"
+#include "../../Config.h"
 
-ApiHandler::ApiHandler() 
+MLBApiHandler::MLBApiHandler() 
     : doc(ApiConfig::JSON_BUFFER_SIZE)
 {
     // HTTPClient is default constructed
 }
 
-ApiHandler::~ApiHandler()
+MLBApiHandler::~MLBApiHandler()
 {
     // HTTPClient and DynamicJsonDocument are automatically cleaned up
 }
 
-bool ApiHandler::getSchedule(const String& date, DynamicJsonDocument& outDoc)
+bool MLBApiHandler::getSchedule(const String& date, DynamicJsonDocument& outDoc)
 {
-    String url = UrlBuilder::buildScheduleUrl(date);
+    String url = MLBUrlBuilder::buildScheduleUrl(date);
     http.begin(url);
     http.useHTTP10();
     
@@ -41,9 +41,9 @@ bool ApiHandler::getSchedule(const String& date, DynamicJsonDocument& outDoc)
     }
 }
 
-bool ApiHandler::getTeamSchedule(TEAM_ID team, const String& date, DynamicJsonDocument& outDoc)
+bool MLBApiHandler::getTeamSchedule(int teamId, const String& date, DynamicJsonDocument& outDoc)
 {
-    String url = UrlBuilder::buildTeamScheduleUrl(date, team);
+    String url = MLBUrlBuilder::buildTeamScheduleUrl(date, teamId);
     http.begin(url);
     http.useHTTP10();
     
@@ -64,20 +64,20 @@ bool ApiHandler::getTeamSchedule(TEAM_ID team, const String& date, DynamicJsonDo
     else
     {
         Serial.printf("HTTP error getting team %d schedule for date %s: %d\n", 
-                     static_cast<int>(team), date.c_str(), httpCode);
+                     teamId, date.c_str(), httpCode);
         http.end();
         return false;
     }
 }
 
-bool ApiHandler::getTeamScheduleToday(TEAM_ID team, DynamicJsonDocument& outDoc)
+bool MLBApiHandler::getTeamScheduleToday(int teamId, DynamicJsonDocument& outDoc)
 {
-    String date = UrlBuilder::getTodayDate();
+    String date = MLBUrlBuilder::getTodayDate();
     if (date.length() == 0)
     {
         Serial.println("Failed to get today's date");
         return false;
     }
     
-    return getTeamSchedule(team, date, outDoc);
+    return getTeamSchedule(teamId, date, outDoc);
 }

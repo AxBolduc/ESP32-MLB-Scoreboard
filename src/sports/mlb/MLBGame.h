@@ -1,13 +1,17 @@
-#ifndef INCLUDE_GAME_H
-#define INCLUDE_GAME_H
+#ifndef INCLUDE_MLB_GAME_H
+#define INCLUDE_MLB_GAME_H
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
+#include "../../core/Game.h"
 
 /**
  * @brief Represents a baseball game with current state
+ * 
+ * MLB-specific game data including baseball elements like innings,
+ * balls, strikes, outs, and base runners.
  */
-class Game
+class MLBGame : public Game
 {
 private:
     String homeTeam;
@@ -16,6 +20,8 @@ private:
     int awayTeamId;
     int homeTeamScore;
     int awayTeamScore;
+    
+    // Baseball-specific fields
     int currentInning;
     int balls;
     int strikes;
@@ -26,16 +32,18 @@ private:
     bool thirdBaseOccupied;
 
 public:
-    explicit Game(const JsonObject& game);
-    ~Game();
+    explicit MLBGame(const JsonObject& game);
+    ~MLBGame() override;
     
-    // Getters - inline for performance
-    String getHomeTeam() const { return homeTeam; }
-    int getHomeTeamId() const { return homeTeamId; }
-    String getAwayTeam() const { return awayTeam; }
-    int getAwayTeamId() const { return awayTeamId; }
-    int getHomeTeamScore() const { return homeTeamScore; }
-    int getAwayTeamScore() const { return awayTeamScore; }
+    // Implement base class interface
+    String getHomeTeam() const override { return homeTeam; }
+    int getHomeTeamId() const override { return homeTeamId; }
+    String getAwayTeam() const override { return awayTeam; }
+    int getAwayTeamId() const override { return awayTeamId; }
+    int getHomeTeamScore() const override { return homeTeamScore; }
+    int getAwayTeamScore() const override { return awayTeamScore; }
+    
+    // Baseball-specific getters
     int getBalls() const { return balls; }
     int getStrikes() const { return strikes; }
     int getOuts() const { return outs; }
@@ -46,4 +54,4 @@ public:
     bool isThirdBaseOccupied() const { return thirdBaseOccupied; }
 };
 
-#endif // INCLUDE_GAME_H
+#endif // INCLUDE_MLB_GAME_H

@@ -7,10 +7,8 @@
 #include <AceButton.h>
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
 #include "Config.h"
-#include "TeamInfo.h"
-#include "Game.h"
-#include "ApiHandler.h"
-#include "GameDrawer.h"
+#include "core/Sport.h"
+#include "core/SportFactory.h"
 #include "SocketHandler.h"
 #include "touchButton.h"
 
@@ -18,17 +16,19 @@
  * @brief Main application orchestrator - owns all components and state
  * 
  * Encapsulates all global state and coordinates between display, networking,
- * and input handling.
+ * and input handling. Now uses Sport abstraction for multi-sport support.
  */
 class Application
 {
 private:
     // Display components
     MatrixPanel_I2S_DMA* display;
-    GameDrawer* gameDrawer;
+    
+    // Sport management (replaces individual gameDrawer, apiHandler, currentGame, team)
+    Sport* currentSport;
+    SportType activeSportType;
     
     // Network components
-    ApiHandler* apiHandler;
     SocketHandler* socketHandler;
     
     // Input handling
@@ -36,8 +36,6 @@ private:
     ace_button::AceButton* button;
     
     // Application state
-    Game* currentGame;
-    TEAM_ID currentTeam;
     unsigned long lastUpdateTime;
     String customNoGameMessage;      // Custom message to show when no game
     bool hasCustomNoGameMessage;     // Flag indicating custom message is set
@@ -48,6 +46,7 @@ private:
     bool connectToWiFi();
     void configureTime();
     void setupButton();
+    void switchSport(SportType newSport);
     
     // Callback handlers (internal)
     void handleButtonEvent(uint8_t eventType, uint8_t buttonState);

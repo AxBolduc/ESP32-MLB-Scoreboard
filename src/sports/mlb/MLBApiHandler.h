@@ -1,31 +1,32 @@
-#ifndef INCLUDE_APIHANDLER_H
-#define INCLUDE_APIHANDLER_H
+#ifndef INCLUDE_MLB_APIHANDLER_H
+#define INCLUDE_MLB_APIHANDLER_H
 
 #include <Arduino.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
-#include "TeamInfo.h"
+#include "../../core/ApiHandler.h"
+#include "MLBTeamInfo.h"
 
 /**
  * @brief Handles HTTP requests to MLB Stats API
  */
-class ApiHandler
+class MLBApiHandler : public ApiHandler
 {
 private:
     HTTPClient http;
     DynamicJsonDocument doc;
 
 public:
-    ApiHandler();
-    ~ApiHandler();
+    MLBApiHandler();
+    ~MLBApiHandler() override;
     
     /**
      * @brief Get team schedule for today
-     * @param team Team ID
+     * @param teamId MLB Team ID
      * @param outDoc Output document to populate with results
      * @return true on success, false on failure
      */
-    bool getTeamScheduleToday(TEAM_ID team, DynamicJsonDocument& outDoc);
+    bool getTeamScheduleToday(int teamId, DynamicJsonDocument& outDoc) override;
     
     /**
      * @brief Get schedule for a specific date
@@ -33,16 +34,16 @@ public:
      * @param outDoc Output document to populate with results
      * @return true on success, false on failure
      */
-    bool getSchedule(const String& date, DynamicJsonDocument& outDoc);
+    bool getSchedule(const String& date, DynamicJsonDocument& outDoc) override;
     
     /**
      * @brief Get team schedule for a specific date
-     * @param team Team ID
+     * @param teamId MLB Team ID
      * @param date Date in YYYY-MM-DD format
      * @param outDoc Output document to populate with results
      * @return true on success, false on failure
      */
-    bool getTeamSchedule(TEAM_ID team, const String& date, DynamicJsonDocument& outDoc);
+    bool getTeamSchedule(int teamId, const String& date, DynamicJsonDocument& outDoc);
 };
 
-#endif // INCLUDE_APIHANDLER_H
+#endif // INCLUDE_MLB_APIHANDLER_H

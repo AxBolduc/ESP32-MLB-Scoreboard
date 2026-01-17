@@ -1,14 +1,13 @@
-#ifndef INCLUDE_URLBUILDER_H
-#define INCLUDE_URLBUILDER_H
+#ifndef INCLUDE_MLB_URLBUILDER_H
+#define INCLUDE_MLB_URLBUILDER_H
 
 #include <Arduino.h>
 #include <vector>
-#include "TeamInfo.h"
 
 /**
  * @brief Builds URLs for MLB Stats API endpoints
  */
-class UrlBuilder
+class MLBUrlBuilder
 {
 public:
     /**
@@ -24,7 +23,7 @@ public:
      * @param teamId MLB team ID
      * @return Complete URL string
      */
-    static String buildTeamScheduleUrl(const String& date, TEAM_ID teamId);
+    static String buildTeamScheduleUrl(const String& date, int teamId);
     
     /**
      * @brief Get today's date in YYYY-MM-DD format
@@ -33,9 +32,9 @@ public:
     static String getTodayDate();
 
 private:
-    UrlBuilder() = delete;  // No instantiation
-    UrlBuilder(const UrlBuilder&) = delete;
-    UrlBuilder& operator=(const UrlBuilder&) = delete;
+    MLBUrlBuilder() = delete;  // No instantiation
+    MLBUrlBuilder(const MLBUrlBuilder&) = delete;
+    MLBUrlBuilder& operator=(const MLBUrlBuilder&) = delete;
     
     /**
      * @brief Internal helper to build API URLs
@@ -47,4 +46,4 @@ private:
     );
 };
 
-#endif // INCLUDE_URLBUILDER_H
+#endif // INCLUDE_MLB_URLBUILDER_H

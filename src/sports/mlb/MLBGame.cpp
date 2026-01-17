@@ -1,6 +1,6 @@
-#include "Game.h"
+#include "MLBGame.h"
 
-Game::Game(const JsonObject& game)
+MLBGame::MLBGame(const JsonObject& game)
 {
     homeTeam = game["teams"]["home"]["team"]["abbreviation"].as<String>();
     homeTeamId = game["teams"]["home"]["team"]["id"].as<int>();
@@ -18,7 +18,7 @@ Game::Game(const JsonObject& game)
     thirdBaseOccupied = game["linescore"]["offense"]["third"].as<bool>();
 }
 
-Game::~Game()
+MLBGame::~MLBGame()
 {
     // Nothing to clean up
 }

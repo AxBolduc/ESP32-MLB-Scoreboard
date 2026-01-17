@@ -8,13 +8,11 @@ Application* g_app = nullptr;
 
 Application::Application()
     : display(nullptr)
-    , gameDrawer(nullptr)
-    , apiHandler(nullptr)
+    , currentSport(nullptr)
+    , activeSportType(SportType::MLB)
     , socketHandler(nullptr)
     , touchConfig(nullptr)
     , button(nullptr)
-    , currentGame(nullptr)
-    , currentTeam(TEAM_ID::BOSTON_REDSOX)
     , lastUpdateTime(0)
     , customNoGameMessage("")
     , hasCustomNoGameMessage(false)
@@ -25,22 +23,16 @@ Application::Application()
 Application::~Application()
 {
     // Clean up in reverse order of creation
-    if (currentGame)
+    if (currentSport)
     {
-        delete currentGame;
-        currentGame = nullptr;
+        delete currentSport;
+        currentSport = nullptr;
     }
     
     if (socketHandler)
     {
         delete socketHandler;
         socketHandler = nullptr;
-    }
-    
-    if (apiHandler)
-    {
-        delete apiHandler;
-        apiHandler = nullptr;
     }
     
     if (button)
@@ -53,12 +45,6 @@ Application::~Application()
     {
         delete touchConfig;
         touchConfig = nullptr;
-    }
-    
-    if (gameDrawer)
-    {
-        delete gameDrawer;
-        gameDrawer = nullptr;
     }
     
     // Don't delete display - it's managed by Matrix singleton
@@ -86,9 +72,6 @@ void Application::initializeDisplay()
     display->setBrightness8(DisplayConfig::BRIGHTNESS);
     display->clearScreen();
     
-    gameDrawer = new GameDrawer(display);
-    gameDrawer->drawLoading();
-    
     Serial.println("Display initialized");
 }
 
@@ -102,9 +85,9 @@ bool Application::connectToWiFi()
     if (!connected)
     {
         Serial.println("Failed to connect to WiFi");
-        if (gameDrawer)
+        if (currentSport && currentSport->getDrawer())
         {
-            gameDrawer->drawFullscreenText("WiFi Failed");
+            currentSport->getDrawer()->drawFullscreenText("WiFi Failed");
         }
         return false;
     }
@@ -156,9 +139,21 @@ bool Application::setup()
         return false;
     }
     
-    // Initialize network components
-    Serial.println("Initializing network components...");
-    apiHandler = new ApiHandler();
+    // Initialize network components and sport
+    Serial.println("Initializing sport and network components...");
+    currentSport = SportFactory::createSport(activeSportType, display);
+    if (!currentSport)
+    {
+        Serial.println("ERROR: Failed to create sport");
+        return false;
+    }
+    
+    // Show loading on display
+    if (currentSport->getDrawer())
+    {
+        currentSport->getDrawer()->drawLoading();
+    }
+    
     socketHandler = new SocketHandler(socketCallbackTrampoline);
     
     // Force initial update
@@ -170,69 +165,19 @@ bool Application::setup()
 
 void Application::updateScreen()
 {
-    if (!apiHandler || !gameDrawer)
+    if (!currentSport)
     {
-        Serial.println("ERROR: Components not initialized");
+        Serial.println("ERROR: Sport not initialized");
         return;
     }
     
     lastUpdateTime = millis();
     
-    Serial.printf("Updating screen for team %d...\n", static_cast<int>(currentTeam));
+    String sportName = SportFactory::sportTypeToString(activeSportType);
+    Serial.printf("Updating screen for %s...\n", sportName.c_str());
     
-    DynamicJsonDocument schedule(ApiConfig::JSON_BUFFER_SIZE);
-    bool success = apiHandler->getTeamScheduleToday(currentTeam, schedule);
-    
-    if (!success)
-    {
-        Serial.println("Failed to get schedule");
-        return;
-    }
-    
-    // Validate response structure
-    if (!schedule["dates"].is<JsonArray>() || schedule["dates"].size() == 0)
-    {
-        Serial.println("No games scheduled for today");
-        if (hasCustomNoGameMessage)
-        {
-            gameDrawer->drawFullscreenText(customNoGameMessage);
-        }
-        else
-        {
-            gameDrawer->drawFullscreenText("No game today");
-        }
-        return;
-    }
-    
-    if (!schedule["dates"][0]["games"].is<JsonArray>() || 
-        schedule["dates"][0]["games"].size() == 0)
-    {
-        Serial.println("No games in schedule");
-        if (hasCustomNoGameMessage)
-        {
-            gameDrawer->drawFullscreenText(customNoGameMessage);
-        }
-        else
-        {
-            gameDrawer->drawFullscreenText("No game data");
-        }
-        return;
-    }
-    
-    JsonObject gameData = schedule["dates"][0]["games"][0].as<JsonObject>();
-    
-    // Delete old game if exists
-    if (currentGame)
-    {
-        delete currentGame;
-        currentGame = nullptr;
-    }
-    
-    // Create and display new game
-    currentGame = new Game(gameData);
-    gameDrawer->drawGame(currentGame);
-    
-    Serial.println("Screen updated successfully");
+    // Sport handles its own update logic (API, game creation, drawing)
+    currentSport->update();
 }
 
 void Application::loop()
@@ -258,18 +203,50 @@ void Application::loop()
 
 // Internal event handlers
 
+void Application::switchSport(SportType newSport)
+{
+    if (newSport == activeSportType) return;
+    
+    Serial.printf("Switching from %s to %s\n",
+                  SportFactory::sportTypeToString(activeSportType).c_str(),
+                  SportFactory::sportTypeToString(newSport).c_str());
+    
+    // Clean up old sport
+    if (currentSport)
+    {
+        delete currentSport;
+        currentSport = nullptr;
+    }
+    
+    // Create new sport
+    currentSport = SportFactory::createSport(newSport, display);
+    activeSportType = newSport;
+    
+    if (!currentSport)
+    {
+        Serial.println("ERROR: Failed to create new sport");
+        return;
+    }
+    
+    // Force immediate update
+    updateScreen();
+}
+
 void Application::handleButtonEvent(uint8_t eventType, uint8_t buttonState)
 {
     switch (eventType)
     {
     case ace_button::AceButton::kEventPressed:
         Serial.println("Button pressed - switching team");
-        currentTeam++;
-        if (gameDrawer)
+        if (currentSport)
         {
-            gameDrawer->drawFullscreenText("Next...");
+            if (currentSport->getDrawer())
+            {
+                currentSport->getDrawer()->drawFullscreenText("Next...");
+            }
+            currentSport->nextTeam();
+            updateScreen();
         }
-        updateScreen();
         break;
         
     case ace_button::AceButton::kEventReleased:
@@ -316,7 +293,29 @@ void Application::handleSocketEvent(WStype_t type, uint8_t* payload, size_t leng
             
             String command = doc["command"].as<String>();
             
-            if (command == "newMessage")
+            if (command == "switchSport")
+            {
+                // Switch sport
+                if (!doc.containsKey("sport"))
+                {
+                    Serial.println("switchSport command missing 'sport' field");
+                    return;
+                }
+                
+                String sportName = doc["sport"].as<String>();
+                SportType newSport = SportFactory::sportTypeFromString(sportName);
+                switchSport(newSport);
+            }
+            else if (command == "nextTeam")
+            {
+                // Cycle to next team within current sport
+                if (currentSport)
+                {
+                    currentSport->nextTeam();
+                    updateScreen();
+                }
+            }
+            else if (command == "newMessage")
             {
                 // Set custom message
                 if (!doc.containsKey("data"))
@@ -330,10 +329,10 @@ void Application::handleSocketEvent(WStype_t type, uint8_t* payload, size_t leng
                 
                 Serial.printf("Custom message set: %s\n", customNoGameMessage.c_str());
                 
-                // Update display immediately if we're currently showing a no-game message
-                if (gameDrawer)
+                // Update display immediately if we have a drawer
+                if (currentSport && currentSport->getDrawer())
                 {
-                    gameDrawer->drawFullscreenText(customNoGameMessage);
+                    currentSport->getDrawer()->drawFullscreenText(customNoGameMessage);
                 }
             }
             else if (command == "clearMessage")
@@ -344,11 +343,8 @@ void Application::handleSocketEvent(WStype_t type, uint8_t* payload, size_t leng
                 
                 Serial.println("Custom message cleared");
                 
-                // Update display immediately to show default message
-                if (gameDrawer)
-                {
-                    gameDrawer->drawFullscreenText("No game today");
-                }
+                // Update screen to resume normal game display
+                updateScreen();
             }
             else
             {
@@ -365,9 +361,9 @@ void Application::handleSocketEvent(WStype_t type, uint8_t* payload, size_t leng
 void Application::handleWiFiAPMode()
 {
     Serial.println("Entering WiFi AP configuration mode");
-    if (gameDrawer)
+    if (currentSport && currentSport->getDrawer())
     {
-        gameDrawer->drawWifi();
+        currentSport->getDrawer()->drawWifi();
     }
 }
 
