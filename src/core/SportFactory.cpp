@@ -1,6 +1,6 @@
 #include "SportFactory.h"
 #include "../sports/mlb/MLBSport.h"
-// #include "../sports/nhl/NHLSport.h"  // TODO Phase 3
+#include "../sports/nhl/NHLSport.h"
 
 Sport* SportFactory::createSport(SportType type, MatrixPanel_I2S_DMA* display)
 {
@@ -10,9 +10,7 @@ Sport* SportFactory::createSport(SportType type, MatrixPanel_I2S_DMA* display)
         return new MLBSport(display);
     
     case SportType::NHL:
-        // TODO Phase 3: return new NHLSport(display);
-        Serial.println("ERROR: NHL sport not yet implemented");
-        return nullptr;
+        return new NHLSport(display);
     
     default:
         Serial.println("ERROR: Unknown sport type");
