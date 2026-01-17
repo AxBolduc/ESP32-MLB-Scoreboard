@@ -2,20 +2,20 @@
 
 MLBGame::MLBGame(const JsonObject& game)
 {
-    homeTeam = game["teams"]["home"]["team"]["abbreviation"].as<String>();
-    homeTeamId = game["teams"]["home"]["team"]["id"].as<int>();
-    awayTeam = game["teams"]["away"]["team"]["abbreviation"].as<String>();
-    awayTeamId = game["teams"]["away"]["team"]["id"].as<int>();
-    homeTeamScore = game["linescore"]["teams"]["home"]["runs"].as<int>();
-    awayTeamScore = game["linescore"]["teams"]["away"]["runs"].as<int>();
-    balls = game["linescore"]["balls"].as<int>();
-    strikes = game["linescore"]["strikes"].as<int>();
-    outs = game["linescore"]["outs"].as<int>();
-    currentInning = game["linescore"]["currentInning"].as<int>();
-    topOfInning = game["linescore"]["isTopInning"].as<bool>();
-    firstBaseOccupied = game["linescore"]["offense"]["first"].as<bool>();
-    secondBaseOccupied = game["linescore"]["offense"]["second"].as<bool>();
-    thirdBaseOccupied = game["linescore"]["offense"]["third"].as<bool>();
+    homeTeam = game["teams"]["home"]["abbr"].as<String>();
+    homeTeamId = game["teams"]["home"]["id"].as<int>();
+    awayTeam = game["teams"]["away"]["abbr"].as<String>();
+    awayTeamId = game["teams"]["away"]["id"].as<int>();
+    homeTeamScore = game["teams"]["home"]["score"].as<int>();
+    awayTeamScore = game["teams"]["away"]["score"].as<int>();
+    balls = game["meta"]["count"]["balls"].as<int>();
+    strikes = game["meta"]["count"]["strikes"].as<int>();
+    outs = game["meta"]["count"]["outs"].as<int>();
+    currentInning = game["period"]["current"].as<int>();
+    topOfInning = game["period"]["isTop"].as<bool>();
+    firstBaseOccupied = game["meta"]["bases"]["first"].as<bool>();
+    secondBaseOccupied = game["meta"]["bases"]["second"].as<bool>();
+    thirdBaseOccupied = game["meta"]["bases"]["third"].as<bool>();
 }
 
 MLBGame::~MLBGame()

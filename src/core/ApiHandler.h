@@ -14,6 +14,8 @@ class ApiHandler
 {
 public:
     virtual ~ApiHandler() = default;
+
+    virtual bool getTeamGame(String teamAbr, DynamicJsonDocument& outDoc) = 0;
     
     /**
      * @brief Get team schedule for today

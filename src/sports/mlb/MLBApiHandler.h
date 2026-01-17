@@ -19,6 +19,14 @@ private:
 public:
     MLBApiHandler();
     ~MLBApiHandler() override;
+
+    /**
+     * @brief Get team game
+     * @param teamAbr MLB Team Abbreviation
+     * @param outDoc Output document to populate with results
+     * @return true on success, false on failure
+     */
+    bool getTeamGame(String teamAbr, DynamicJsonDocument& outDoc) override;
     
     /**
      * @brief Get team schedule for today

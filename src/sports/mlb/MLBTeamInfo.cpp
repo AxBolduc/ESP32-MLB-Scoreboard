@@ -76,6 +76,39 @@ static const std::map<int, uint16_t> TEAMS_TEXT_COLORS = {
     {MLB_TEAM_ID::WASHINGTON_NATIONALS, MLBColor::MLB_WHITE}
 };
 
+static const std::map<int, String> TEAM_ABBREVS = {
+    {MLB_TEAM_ID::ATLANTA_BRAVES, "ATL"},
+    {MLB_TEAM_ID::ARIZONA_DIAMONDBACKS, "AZ"},
+    {MLB_TEAM_ID::BALTIMORE_ORIOLES, "BAL"},
+    {MLB_TEAM_ID::BOSTON_REDSOX, "BOS"},
+    {MLB_TEAM_ID::CHICAGO_CUBS, "CHC"},
+    {MLB_TEAM_ID::CHICAGO_WHITE_SOX, "CWS"},
+    {MLB_TEAM_ID::CINCINNATI_REDS, "CIN"},
+    {MLB_TEAM_ID::CLEVELAND_INDIANS, "CLE"},
+    {MLB_TEAM_ID::COLORADO_ROCKIES, "COL"},
+    {MLB_TEAM_ID::DETROIT_TIGERS, "DET"},
+    {MLB_TEAM_ID::HOUSTON_ASTROS, "HOU"},
+    {MLB_TEAM_ID::KANSAS_CITY_ROYALS, "KC"},
+    {MLB_TEAM_ID::LOS_ANGELES_ANGELS, "LAA"},
+    {MLB_TEAM_ID::LOS_ANGELES_DODGERS, "LAD"},
+    {MLB_TEAM_ID::MIAMI_MARLINS, "MIA"},
+    {MLB_TEAM_ID::MILWAUKEE_BREWERS, "MIL"},
+    {MLB_TEAM_ID::MINNESOTA_TWINS, "MIN"},
+    {MLB_TEAM_ID::NEW_YORK_METS, "NYM"},
+    {MLB_TEAM_ID::NEW_YORK_YANKEES, "NYY"},
+    {MLB_TEAM_ID::OAKLAND_ATHLETICS, "OAK"},
+    {MLB_TEAM_ID::PHILADELPHIA_PHILLIES, "PHI"},
+    {MLB_TEAM_ID::PITTSBURGH_PIRATES, "PIT"},
+    {MLB_TEAM_ID::SAN_DIEGO_PADRES, "SD"},
+    {MLB_TEAM_ID::SAN_FRANCISCO_GIANTS, "SF"},
+    {MLB_TEAM_ID::SEATTLE_MARINERS, "SEA"},
+    {MLB_TEAM_ID::ST_LOUIS_CARDINALS, "STL"},
+    {MLB_TEAM_ID::TAMPA_BAY_RAYS, "TB"},
+    {MLB_TEAM_ID::TEXAS_RANGERS, "TEX"},
+    {MLB_TEAM_ID::TORONTO_BLUE_JAYS, "TOR"},
+    {MLB_TEAM_ID::WASHINGTON_NATIONALS, "WSH"}
+};
+
 int MLBTeamInfo::getTeamId(int index) const
 {
     if (index >= 0 && index < NUM_TEAMS)
@@ -117,7 +150,11 @@ int MLBTeamInfo::getPreviousTeamIndex(int currentIndex) const
 
 String MLBTeamInfo::getTeamAbbreviation(int teamId) const
 {
-    // This would need a map for full implementation
-    // For now, return empty (API provides abbreviations)
-    return "";
+    auto it = TEAM_ABBREVS.find(teamId);
+    if (it != TEAM_ABBREVS.end())
+    {
+        return it->second;
+    }
+
+    return "BOS";
 }

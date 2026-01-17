@@ -13,6 +13,19 @@ NHLApiHandler::~NHLApiHandler()
     // HTTPClient and DynamicJsonDocument are automatically cleaned up
 }
 
+bool NHLApiHandler::getTeamGame(String teamAbr, DynamicJsonDocument& outDoc) {
+    // STUBBED: NHL API not yet implemented
+    // When ready, uncomment and implement:
+    // String url = String(NetworkConfig::WEBSOCKET_URL) + "/sports/nhl/game?teamAbr=" + teamAbr;
+    // http.begin(url);
+    // http.useHTTP10();
+    // int httpCode = http.GET();
+    // ... etc
+    
+    Serial.println("NHL API is stubbed - no game data available");
+    return false;  // No game found
+}
+
 bool NHLApiHandler::getSchedule(const String& date, DynamicJsonDocument& outDoc)
 {
     // STUBBED: NHL API not yet implemented

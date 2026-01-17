@@ -22,6 +22,8 @@ private:
 public:
     NHLApiHandler();
     ~NHLApiHandler() override;
+
+    bool getTeamGame(String teamAbr, DynamicJsonDocument& outDoc) override;
     
     /**
      * @brief Get team schedule for today (STUBBED)
