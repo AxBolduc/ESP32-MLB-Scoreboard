@@ -240,11 +240,16 @@ void Application::handleButtonEvent(uint8_t eventType, uint8_t buttonState)
         Serial.println("Button pressed - switching team");
         if (currentSport)
         {
+
+            int nextTeamIndex = currentSport->nextTeam();
+
             if (currentSport->getDrawer())
             {
-                currentSport->getDrawer()->drawFullscreenText("Next...");
+                TeamInfo *teamInfo = currentSport->getTeamInfo();
+                String nextTeam = teamInfo->getTeamAbbreviation(teamInfo->getTeamId(nextTeamIndex));
+                currentSport->getDrawer()->drawFullscreenText("Next: " + nextTeam);
             }
-            currentSport->nextTeam();
+
             updateScreen();
         }
         break;

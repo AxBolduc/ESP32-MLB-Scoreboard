@@ -55,7 +55,8 @@ void Sport::update()
 
     if (!success)
     {
-        Serial.println("Failed to get schedule");
+        Serial.println("No Games");
+        drawer->drawFullscreenText("No " + teamInfo->getTeamAbbreviation(teamId) + " games today");
         return;
     }
 
@@ -88,32 +89,36 @@ void Sport::update()
     }
 }
 
-void Sport::nextTeam()
+int Sport::nextTeam()
 {
     TeamInfo *teamInfo = getTeamInfo();
     if (!teamInfo)
     {
         Serial.println("ERROR: TeamInfo not available");
-        return;
+        return -1;
     }
 
     currentTeamIndex = teamInfo->getNextTeamIndex(currentTeamIndex);
     Serial.printf("Switched to team index %d (ID: %d)\n",
                   currentTeamIndex, teamInfo->getTeamId(currentTeamIndex));
+
+    return currentTeamIndex;
 }
 
-void Sport::previousTeam()
+int Sport::previousTeam()
 {
     TeamInfo *teamInfo = getTeamInfo();
     if (!teamInfo)
     {
         Serial.println("ERROR: TeamInfo not available");
-        return;
+        return -1;
     }
 
     currentTeamIndex = teamInfo->getPreviousTeamIndex(currentTeamIndex);
     Serial.printf("Switched to team index %d (ID: %d)\n",
                   currentTeamIndex, teamInfo->getTeamId(currentTeamIndex));
+
+    return currentTeamIndex;
 }
 
 int Sport::getCurrentTeamId() const

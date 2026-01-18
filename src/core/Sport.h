@@ -103,12 +103,12 @@ public:
     /**
      * @brief Switch to next team in rotation
      */
-    virtual void nextTeam();
+    virtual int nextTeam();
     
     /**
      * @brief Switch to previous team in rotation
      */
-    virtual void previousTeam();
+    virtual int previousTeam();
     
     /**
      * @brief Get current game object
