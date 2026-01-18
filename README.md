@@ -32,6 +32,12 @@ The project uses the ESP32 HUB75 library default pin configuration. Refer to you
 - USB cable for programming
 - Serial monitor (115200 baud)
 
+## API
+
+The project uses an API proxy that you can self-host which makes calls to the official sport APIs and return JSON data in a more consistent format.
+
+**API logic and server code:** [LED-Matrix-Scoreboard-Server](https://github.com/AxBolduc/LED-Matrix-Scoreboard-Server)
+
 ## Quick Start
 
 ### 1. Clone the Repository
@@ -231,9 +237,6 @@ pio run --target clean
 3. Monitor serial output for button events
 4. Adjust threshold if needed (default: 35)
 
-## API
-
-The project uses an API proxy that you can self-host which makes calls to the official sport APIs and return JSON data in a more consistent format.
 
 ## Contributing
 
