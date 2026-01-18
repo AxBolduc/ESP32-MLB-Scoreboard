@@ -36,7 +36,6 @@ void NHLGameDrawer::drawGame(const Game* game)
     drawScores(nhlGame);
     drawPeriod(nhlGame);
     drawTime(nhlGame);
-    drawShots(nhlGame);
     drawOvertimeIndicator(nhlGame);
 }
 
@@ -115,23 +114,6 @@ void NHLGameDrawer::drawTime(const NHLGame* game)
     display->setCursor(22, 23);
     display->setTextSize(1);
     display->print(timeStr);
-}
-
-void NHLGameDrawer::drawShots(const NHLGame* game)
-{
-    if (!game || !display) return;
-    
-    // Draw shots on goal as small numbers below scores
-    display->setTextColor(Color::YELLOW);
-    display->setTextSize(1);
-    
-    // Away team shots
-    display->setCursor(8, 20);
-    display->print(game->getAwayTeamShots());
-    
-    // Home team shots
-    display->setCursor(DisplayConfig::DISPLAY_WIDTH - 14, 20);
-    display->print(game->getHomeTeamShots());
 }
 
 void NHLGameDrawer::drawOvertimeIndicator(const NHLGame* game)

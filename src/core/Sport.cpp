@@ -53,9 +53,6 @@ void Sport::update()
     DynamicJsonDocument game(ApiConfig::JSON_BUFFER_SIZE);
     bool success = apiHandler->getTeamGame(teamInfo->getTeamAbbreviation(teamId), game);
 
-    // DynamicJsonDocument schedule(ApiConfig::JSON_BUFFER_SIZE);
-    // bool success = apiHandler->getTeamScheduleToday(teamId, schedule);
-
     if (!success)
     {
         Serial.println("Failed to get schedule");

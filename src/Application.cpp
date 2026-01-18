@@ -9,7 +9,7 @@ Application* g_app = nullptr;
 Application::Application()
     : display(nullptr)
     , currentSport(nullptr)
-    , activeSportType(SportType::MLB)
+    , activeSportType(SportType::NHL)
     , socketHandler(nullptr)
     , touchConfig(nullptr)
     , button(nullptr)
@@ -114,7 +114,7 @@ void Application::setupButton()
 bool Application::setup()
 {
     Serial.begin(115200);
-    Serial.println("\n\n=== MLB Scoreboard Starting ===");
+    Serial.println("\n\n=== Scoreboard Starting ===");
     
     // Set global pointer for callbacks
     g_app = this;

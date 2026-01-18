@@ -24,8 +24,6 @@ private:
     // Hockey-specific fields
     int currentPeriod;          // 1, 2, 3, 4 (OT), 5 (SO)
     String timeRemaining;       // "12:34" format
-    int homeTeamShots;
-    int awayTeamShots;
     bool isOvertime;            // True if in any overtime period
     bool isShootout;            // True if in shootout
 
@@ -44,8 +42,6 @@ public:
     // Hockey-specific getters
     int getCurrentPeriod() const { return currentPeriod; }
     String getTimeRemaining() const { return timeRemaining; }
-    int getHomeTeamShots() const { return homeTeamShots; }
-    int getAwayTeamShots() const { return awayTeamShots; }
     bool getIsOvertime() const { return isOvertime; }
     bool getIsShootout() const { return isShootout; }
 };
