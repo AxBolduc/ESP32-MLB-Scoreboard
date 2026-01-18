@@ -1,6 +1,6 @@
-# ESP32 MLB Scoreboard
+# LED Matrix Scoreboard
 
-A real-time MLB baseball scoreboard powered by ESP32 and a 64x32 LED matrix display. Displays live game information including scores, inning, ball/strike/out count, and base runners for your favorite MLB team.
+A real-time scoreboard powered by ESP32 and a 64x32 LED matrix display. Displays live game information for multiple sports including MLB and NHL.
 
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen)
 ![Platform](https://img.shields.io/badge/platform-ESP32-blue)
@@ -8,12 +8,10 @@ A real-time MLB baseball scoreboard powered by ESP32 and a 64x32 LED matrix disp
 
 ## Features
 
-- 🏟️ **Live Game Data** - Real-time scores from MLB Stats API
+- 🏟️ **Live Game Data** - Real-time scores from MLB and NHL
 - 🎨 **Team Colors** - Authentic team color schemes
-- 📊 **Game Details** - Score, inning, count, and base runners
 - 🔄 **Auto-Refresh** - Updates every 30 seconds
 - 📱 **Touch Button** - Cycle through teams manually
-- 🌐 **WebSocket** - Real-time updates via WebSocket
 - 📡 **WiFi Manager** - Easy WiFi configuration via AP mode
 - ⏰ **NTP Sync** - Automatic time synchronization
 
@@ -203,11 +201,6 @@ pio run --target upload
 pio run --target clean
 ```
 
-### Memory Usage
-
-- **RAM**: ~49KB / 320KB (15%)
-- **Flash**: ~1.1MB / 3MB (35%)
-
 ## Troubleshooting
 
 ### Display Not Working
@@ -240,10 +233,7 @@ pio run --target clean
 
 ## API
 
-The project uses the official [MLB Stats API](http://statsapi.mlb.com/api/):
-- Endpoint: `http://statsapi.mlb.com/api/v1/schedule`
-- No API key required
-- Rate limiting: Not enforced for individual use
+The project uses an API proxy that you can self-host which makes calls to the official sport APIs and return JSON data in a more consistent format.
 
 ## Contributing
 
@@ -269,10 +259,10 @@ This project is open source and available under the MIT License.
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/yourusername/ESP32-MLB-Scoreboard/issues)
+- **Issues**: [GitHub Issues](https://github.com/axbolduc/LED-Matrix-Scoreboard/issues)
 - **Documentation**: [AGENTS.md](AGENTS.md)
 - **Hardware Guide**: See LED matrix library documentation
 
 ---
 
-**Made with ⚾ for baseball fans**
+**Made with ⚾ for Sports fans**
