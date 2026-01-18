@@ -2,37 +2,32 @@
 #define INCLUDE_MATRIX_H
 
 #include <ESP32-HUB75-MatrixPanel-I2S-DMA.h>
-#include "constants.h"
+#include "Config.h"
 
+/**
+ * @brief Singleton wrapper for LED matrix display
+ */
 class Matrix
 {
-protected:
-    static MatrixPanel_I2S_DMA *dma_display;
-    Matrix();
+private:
+    static MatrixPanel_I2S_DMA* instance;
+    
+    // Prevent instantiation
+    Matrix() = delete;
+    Matrix(const Matrix&) = delete;
+    Matrix& operator=(const Matrix&) = delete;
 
 public:
-    ~Matrix();
-    static MatrixPanel_I2S_DMA *get()
-    {
-        HUB75_I2S_CFG mxconfig;
-        mxconfig.mx_height = PANEL_HEIGHT;
-        mxconfig.chain_length = PANELS_NUMBER;
-        mxconfig.clkphase = false;
-
-        if (dma_display == nullptr)
-            dma_display = new MatrixPanel_I2S_DMA(mxconfig);
-
-        return dma_display;
-    }
+    /**
+     * @brief Get the singleton matrix display instance
+     * @return Pointer to the matrix display
+     */
+    static MatrixPanel_I2S_DMA* getInstance();
+    
+    /**
+     * @brief Clean up the matrix display (call before restart if needed)
+     */
+    static void cleanup();
 };
-
-Matrix::Matrix(/* args */)
-{
-}
-
-Matrix::~Matrix()
-{
-    delete (this->dma_display);
-}
 
 #endif // INCLUDE_MATRIX_H

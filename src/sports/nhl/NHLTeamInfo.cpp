@@ -1,0 +1,167 @@
+#include "NHLTeamInfo.h"
+#include <map>
+
+// Team IDs array for cycling through teams (alphabetical by city)
+const int NHLTeamInfo::TEAM_IDS[NHLTeamInfo::NUM_TEAMS] = {
+    24, 53, 6, 7, 20, 12, 16, 21, 29, 25,
+    17, 22, 13, 26, 30, 8, 18, 1, 2, 3,
+    9, 4, 5, 28, 55, 19, 14, 10, 23, 54,
+    15, 52
+};
+
+// Team background colors map
+static const std::map<int, uint16_t> TEAM_BG_COLORS = {
+    {NHL_TEAM_ID::ANAHEIM_DUCKS, NHLColor::NHL_ORANGE},
+    {NHL_TEAM_ID::ARIZONA_COYOTES, NHLColor::NHL_MAROON},
+    {NHL_TEAM_ID::BOSTON_BRUINS, NHLColor::NHL_YELLOW},
+    {NHL_TEAM_ID::BUFFALO_SABRES, NHLColor::NHL_NAVY_BLUE},
+    {NHL_TEAM_ID::CALGARY_FLAMES, NHLColor::NHL_RED},
+    {NHL_TEAM_ID::CAROLINA_HURRICANES, NHLColor::NHL_RED},
+    {NHL_TEAM_ID::CHICAGO_BLACKHAWKS, NHLColor::NHL_RED},
+    {NHL_TEAM_ID::COLORADO_AVALANCHE, NHLColor::NHL_MAROON},
+    {NHL_TEAM_ID::COLUMBUS_BLUE_JACKETS, NHLColor::NHL_NAVY_BLUE},
+    {NHL_TEAM_ID::DALLAS_STARS, NHLColor::NHL_GREEN},
+    {NHL_TEAM_ID::DETROIT_RED_WINGS, NHLColor::NHL_RED},
+    {NHL_TEAM_ID::EDMONTON_OILERS, NHLColor::NHL_ORANGE},
+    {NHL_TEAM_ID::FLORIDA_PANTHERS, NHLColor::NHL_NAVY_BLUE},
+    {NHL_TEAM_ID::LOS_ANGELES_KINGS, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::MINNESOTA_WILD, NHLColor::NHL_GREEN},
+    {NHL_TEAM_ID::MONTREAL_CANADIENS, NHLColor::NHL_RED},
+    {NHL_TEAM_ID::NASHVILLE_PREDATORS, NHLColor::NHL_GOLD},
+    {NHL_TEAM_ID::NEW_JERSEY_DEVILS, NHLColor::NHL_RED},
+    {NHL_TEAM_ID::NEW_YORK_ISLANDERS, NHLColor::NHL_ORANGE},
+    {NHL_TEAM_ID::NEW_YORK_RANGERS, NHLColor::NHL_ROYAL_BLUE},
+    {NHL_TEAM_ID::OTTAWA_SENATORS, NHLColor::NHL_RED},
+    {NHL_TEAM_ID::PHILADELPHIA_FLYERS, NHLColor::NHL_ORANGE},
+    {NHL_TEAM_ID::PITTSBURGH_PENGUINS, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::SAN_JOSE_SHARKS, NHLColor::NHL_TEAL},
+    {NHL_TEAM_ID::SEATTLE_KRAKEN, NHLColor::NHL_LIGHT_BLUE},
+    {NHL_TEAM_ID::ST_LOUIS_BLUES, NHLColor::NHL_ROYAL_BLUE},
+    {NHL_TEAM_ID::TAMPA_BAY_LIGHTNING, NHLColor::NHL_ROYAL_BLUE},
+    {NHL_TEAM_ID::TORONTO_MAPLE_LEAFS, NHLColor::NHL_ROYAL_BLUE},
+    {NHL_TEAM_ID::VANCOUVER_CANUCKS, NHLColor::NHL_ROYAL_BLUE},
+    {NHL_TEAM_ID::VEGAS_GOLDEN_KNIGHTS, NHLColor::NHL_GOLD},
+    {NHL_TEAM_ID::WASHINGTON_CAPITALS, NHLColor::NHL_RED},
+    {NHL_TEAM_ID::WINNIPEG_JETS, NHLColor::NHL_NAVY_BLUE}
+};
+
+// Team text colors map
+static const std::map<int, uint16_t> TEAMS_TEXT_COLORS = {
+    {NHL_TEAM_ID::ANAHEIM_DUCKS, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::ARIZONA_COYOTES, NHLColor::NHL_WHITE},
+    {NHL_TEAM_ID::BOSTON_BRUINS, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::BUFFALO_SABRES, NHLColor::NHL_YELLOW},
+    {NHL_TEAM_ID::CALGARY_FLAMES, NHLColor::NHL_YELLOW},
+    {NHL_TEAM_ID::CAROLINA_HURRICANES, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::CHICAGO_BLACKHAWKS, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::COLORADO_AVALANCHE, NHLColor::NHL_LIGHT_BLUE},
+    {NHL_TEAM_ID::COLUMBUS_BLUE_JACKETS, NHLColor::NHL_RED},
+    {NHL_TEAM_ID::DALLAS_STARS, NHLColor::NHL_WHITE},
+    {NHL_TEAM_ID::DETROIT_RED_WINGS, NHLColor::NHL_WHITE},
+    {NHL_TEAM_ID::EDMONTON_OILERS, NHLColor::NHL_NAVY_BLUE},
+    {NHL_TEAM_ID::FLORIDA_PANTHERS, NHLColor::NHL_RED},
+    {NHL_TEAM_ID::LOS_ANGELES_KINGS, NHLColor::NHL_WHITE},
+    {NHL_TEAM_ID::MINNESOTA_WILD, NHLColor::NHL_WHITE},
+    {NHL_TEAM_ID::MONTREAL_CANADIENS, NHLColor::NHL_WHITE},
+    {NHL_TEAM_ID::NASHVILLE_PREDATORS, NHLColor::NHL_NAVY_BLUE},
+    {NHL_TEAM_ID::NEW_JERSEY_DEVILS, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::NEW_YORK_ISLANDERS, NHLColor::NHL_ROYAL_BLUE},
+    {NHL_TEAM_ID::NEW_YORK_RANGERS, NHLColor::NHL_WHITE},
+    {NHL_TEAM_ID::OTTAWA_SENATORS, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::PHILADELPHIA_FLYERS, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::PITTSBURGH_PENGUINS, NHLColor::NHL_GOLD},
+    {NHL_TEAM_ID::SAN_JOSE_SHARKS, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::SEATTLE_KRAKEN, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::ST_LOUIS_BLUES, NHLColor::NHL_YELLOW},
+    {NHL_TEAM_ID::TAMPA_BAY_LIGHTNING, NHLColor::NHL_WHITE},
+    {NHL_TEAM_ID::TORONTO_MAPLE_LEAFS, NHLColor::NHL_WHITE},
+    {NHL_TEAM_ID::VANCOUVER_CANUCKS, NHLColor::NHL_GREEN},
+    {NHL_TEAM_ID::VEGAS_GOLDEN_KNIGHTS, NHLColor::NHL_BLACK},
+    {NHL_TEAM_ID::WASHINGTON_CAPITALS, NHLColor::NHL_WHITE},
+    {NHL_TEAM_ID::WINNIPEG_JETS, NHLColor::NHL_WHITE}
+};
+
+int NHLTeamInfo::getTeamId(int index) const
+{
+    if (index < 0 || index >= NUM_TEAMS)
+    {
+        return TEAM_IDS[0];  // Default to first team
+    }
+    return TEAM_IDS[index];
+}
+
+uint16_t NHLTeamInfo::getBackgroundColor(int teamId) const
+{
+    auto it = TEAM_BG_COLORS.find(teamId);
+    if (it != TEAM_BG_COLORS.end())
+    {
+        return it->second;
+    }
+    return NHLColor::NHL_BLACK;  // Default color
+}
+
+uint16_t NHLTeamInfo::getTextColor(int teamId) const
+{
+    auto it = TEAMS_TEXT_COLORS.find(teamId);
+    if (it != TEAMS_TEXT_COLORS.end())
+    {
+        return it->second;
+    }
+    return NHLColor::NHL_WHITE;  // Default color
+}
+
+int NHLTeamInfo::getNextTeamIndex(int currentIndex) const
+{
+    return (currentIndex + 1) % NUM_TEAMS;
+}
+
+int NHLTeamInfo::getPreviousTeamIndex(int currentIndex) const
+{
+    return (currentIndex - 1 + NUM_TEAMS) % NUM_TEAMS;
+}
+
+String NHLTeamInfo::getTeamAbbreviation(int teamId) const
+{
+    // Map team IDs to their 3-letter abbreviations
+    static const std::map<int, String> TEAM_ABBREVS = {
+        {NHL_TEAM_ID::ANAHEIM_DUCKS, "ANA"},
+        {NHL_TEAM_ID::ARIZONA_COYOTES, "ARI"},
+        {NHL_TEAM_ID::BOSTON_BRUINS, "BOS"},
+        {NHL_TEAM_ID::BUFFALO_SABRES, "BUF"},
+        {NHL_TEAM_ID::CALGARY_FLAMES, "CGY"},
+        {NHL_TEAM_ID::CAROLINA_HURRICANES, "CAR"},
+        {NHL_TEAM_ID::CHICAGO_BLACKHAWKS, "CHI"},
+        {NHL_TEAM_ID::COLORADO_AVALANCHE, "COL"},
+        {NHL_TEAM_ID::COLUMBUS_BLUE_JACKETS, "CBJ"},
+        {NHL_TEAM_ID::DALLAS_STARS, "DAL"},
+        {NHL_TEAM_ID::DETROIT_RED_WINGS, "DET"},
+        {NHL_TEAM_ID::EDMONTON_OILERS, "EDM"},
+        {NHL_TEAM_ID::FLORIDA_PANTHERS, "FLA"},
+        {NHL_TEAM_ID::LOS_ANGELES_KINGS, "LAK"},
+        {NHL_TEAM_ID::MINNESOTA_WILD, "MIN"},
+        {NHL_TEAM_ID::MONTREAL_CANADIENS, "MTL"},
+        {NHL_TEAM_ID::NASHVILLE_PREDATORS, "NSH"},
+        {NHL_TEAM_ID::NEW_JERSEY_DEVILS, "NJD"},
+        {NHL_TEAM_ID::NEW_YORK_ISLANDERS, "NYI"},
+        {NHL_TEAM_ID::NEW_YORK_RANGERS, "NYR"},
+        {NHL_TEAM_ID::OTTAWA_SENATORS, "OTT"},
+        {NHL_TEAM_ID::PHILADELPHIA_FLYERS, "PHI"},
+        {NHL_TEAM_ID::PITTSBURGH_PENGUINS, "PIT"},
+        {NHL_TEAM_ID::SAN_JOSE_SHARKS, "SJS"},
+        {NHL_TEAM_ID::SEATTLE_KRAKEN, "SEA"},
+        {NHL_TEAM_ID::ST_LOUIS_BLUES, "STL"},
+        {NHL_TEAM_ID::TAMPA_BAY_LIGHTNING, "TBL"},
+        {NHL_TEAM_ID::TORONTO_MAPLE_LEAFS, "TOR"},
+        {NHL_TEAM_ID::VANCOUVER_CANUCKS, "VAN"},
+        {NHL_TEAM_ID::VEGAS_GOLDEN_KNIGHTS, "VGK"},
+        {NHL_TEAM_ID::WASHINGTON_CAPITALS, "WSH"},
+        {NHL_TEAM_ID::WINNIPEG_JETS, "WPG"}
+    };
+    
+    auto it = TEAM_ABBREVS.find(teamId);
+    if (it != TEAM_ABBREVS.end())
+    {
+        return it->second;
+    }
+    return "???";  // Unknown team
+}
